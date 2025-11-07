@@ -40,7 +40,7 @@ mlflow.set_experiment("taco_sort_training")
 # Define training parameters with augmentation
 params = {
     "model_type": "./taco-sort-mlops/yolo11m.pt",
-    "epochs": 200,
+    "epochs": 180,
     "imgsz": 640,
     "lr0": 0.005,
     # Color space augmentations
