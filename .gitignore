@@ -3,3 +3,4 @@ data/raw
 mlartifacts/
 mlruns/
 runs/
+gcs_key.json
