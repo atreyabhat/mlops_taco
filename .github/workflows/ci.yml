@@ -17,10 +17,9 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Install from your requirements file
           pip install -r requirements.txt
-          # Install testing libraries
           pip install pytest black
+          pip install httpx  # For API testing
       
       - name: Lint with Black
         run: black --check .
@@ -54,10 +53,9 @@ jobs:
           # 1. Create a temporary key file from the GitHub Secret
           echo "${GCS_CREDENTIALS}" > gcs-key.json
           
-          # 2. Tell Google Cloud to use this key file
           export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcs-key.json
           
-          # 3. Pull the data. This will fail if auth or checksums are bad.
+          # 2. Pull the data. This will fail if auth or checksums are bad.
           dvc pull
           
           echo "Successfully pulled and verified DVC data."
