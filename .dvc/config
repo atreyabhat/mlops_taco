@@ -1,4 +1,4 @@
 [core]
-    remote = myremote
-['remote "myremote"']
-    url = gdrive://1A5xvgvqMgg5MfcYfPjcDNYcrUGHjGnz_
+    remote = my-gcs-remote
+['remote "my-gcs-remote"']
+    url = gs://bhat_dataset_storage/taco
