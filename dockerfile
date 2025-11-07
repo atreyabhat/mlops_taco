@@ -14,10 +14,12 @@ COPY requirements.txt .
 #    - 'pip install' runs
 #    - 'apt-get purge' removes the compilers to keep the final image small
 RUN apt-get update && \
-    apt-get install -y build-essential && \
+    apt-get install -y build-essential libgl1 \
+    libglib2.0-0 && \
     \
     pip install --no-cache-dir -r requirements.txt && \
     \
+    # Clean up build tools to keep image small
     apt-get purge -y build-essential && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*

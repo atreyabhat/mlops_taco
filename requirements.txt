@@ -5,3 +5,5 @@ ultralytics
 pandas
 Pillow
 python-multipart
+prometheus-fastapi-instrumentator
+evidently
