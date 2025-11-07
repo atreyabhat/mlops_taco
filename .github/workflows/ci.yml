@@ -1,0 +1,63 @@
+name: CI - Test Code and Pull Data
+
+on: [push, pull_request]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install from your requirements file
+          pip install -r requirements.txt
+          # Install testing libraries
+          pip install pytest black
+      
+      - name: Lint with Black
+        run: black --check .
+      
+      - name: Test with Pytest
+        run: pytest
+
+  pull-data:
+    # This job runs at the same time as test-and-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Set up DVC
+        uses: iterative/setup-dvc@v1
+      
+      - name: Install DVC GCS Support
+        run: pip install "dvc[gs]"
+      
+      - name: Authenticate and Pull DVC Data
+        env:
+          # This securely loads the secret you created in Step 1
+          GCS_CREDENTIALS: ${{ secrets.GCS_CREDENTIALS }}
+        run: |
+          # 1. Create a temporary key file from the GitHub Secret
+          echo "${GCS_CREDENTIALS}" > gcs-key.json
+          
+          # 2. Tell Google Cloud to use this key file
+          export GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcs-key.json
+          
+          # 3. Pull the data. This will fail if auth or checksums are bad.
+          dvc pull
+          
+          echo "Successfully pulled and verified DVC data."
