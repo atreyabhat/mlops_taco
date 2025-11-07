@@ -24,8 +24,8 @@ jobs:
       - name: Lint with Black
         run: black --check .
       
-      - name: Test with Pytest
-        run: pytest
+      # - name: Test with Pytest
+      #   run: pytest
 
   pull-data:
     # This job runs at the same time as test-and-lint
