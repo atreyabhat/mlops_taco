@@ -65,12 +65,20 @@ def coco_to_yolo(coco_bbox, img_w, img_h):
 
 # Process each image and create its .txt label file
 converted_count = 0
+files_created = 0
 for img_id, img_data in images_map.items():
     img_w = img_data["width"]
     img_h = img_data["height"]
 
-    base_name = os.path.splitext(os.path.basename(img_data["file_name"]))[0]
-    label_path = os.path.join(RAW_LABELS_DIR, f"{base_name}.txt")
+    # --- FIX: Use os.path.splitext to handle .jpg, .JPG, .png ---
+    # e.g., "batch_1/000008.jpg" -> "batch_1_000008"
+    # e.g., "batch_7/000044.JPG" -> "batch_7_000044"
+    temp_img_name = img_data["file_name"].replace("/", "_")
+    unique_base_name = os.path.splitext(temp_img_name)[0]
+    # --- End of Fix ---
+
+    label_file_name = f"{unique_base_name}.txt"
+    label_path = os.path.join(RAW_LABELS_DIR, label_file_name)
 
     yolo_lines = []
 
@@ -84,15 +92,16 @@ for img_id, img_data in images_map.items():
 
     with open(label_path, "w") as f:
         f.writelines(yolo_lines)
+    files_created += 1
 
     if yolo_lines:
         converted_count += 1
 
 print(
-    f"Conversion complete. Created {len(images_map)} .txt label files in {RAW_LABELS_DIR}."
+    f"Conversion complete. Created {files_created} .txt label files in {RAW_LABELS_DIR}."
 )
 print(
-    f"({converted_count} files contain annotations, {len(images_map) - converted_count} are empty)."
+    f"({converted_count} files contain annotations, {files_created - converted_count} are empty)."
 )
 
 # Part 2: Split images and labels into train/val sets
@@ -116,34 +125,52 @@ for subset, images_in_subset in [("train", train_images), ("val", val_images)]:
     os.makedirs(lbl_subset_dir, exist_ok=True)
 
     print(f"Processing {subset} set...")
+    copied_images = 0
     copied_labels = 0
 
     for img_data in images_in_subset:
-        img_file_path_relative = img_data["file_name"]
-        img_file_name = os.path.basename(img_file_path_relative)
-        base_name = os.path.splitext(img_file_name)[0]
+        img_file_path_relative = img_data["file_name"]  # "batch_1/000008.jpg"
+
+        # --- FIX: Use the same unique naming scheme as Part 1 ---
+        # Handle mixed extensions like .JPG, .jpg, .png
+        temp_img_name = img_file_path_relative.replace("/", "_")
+        base_name = os.path.splitext(temp_img_name)[0]
+
+        # Standardize on .jpg for all output images
+        unique_img_name = f"{base_name}.jpg"
         label_file_name = f"{base_name}.txt"
+        # --- End of Fix ---
 
         src_img_path = os.path.join(RAW_DIR, img_file_path_relative)
         src_label_path = os.path.join(RAW_LABELS_DIR, label_file_name)
-        dst_img_path = os.path.join(img_subset_dir, img_file_name)
+        dst_img_path = os.path.join(img_subset_dir, unique_img_name)
         dst_label_path = os.path.join(lbl_subset_dir, label_file_name)
 
         if not os.path.exists(src_img_path):
             print(f"Warning: Source image not found: {src_img_path}")
             continue
+
         shutil.copy(src_img_path, dst_img_path)
+        copied_images += 1
 
         if os.path.exists(src_label_path):
-            shutil.copy(src_label_path, dst_label_path)
-            copied_labels += 1
+            # Only copy the label if it's not empty
+            if os.path.getsize(src_label_path) > 0:
+                shutil.copy(src_label_path, dst_label_path)
+                copied_labels += 1
+            else:
+                # If the image had no annotations, we still create an empty .txt file
+                # This is what YOLO expects.
+                open(dst_label_path, "w").close()
         else:
             print(
-                f"Warning: Label file not found for {img_file_name} at {src_label_path}"
+                f"Warning: Label file not found for {img_file_path_relative} at {src_label_path}"
             )
+            # Create an empty file anyway, as the image exists
+            open(dst_label_path, "w").close()
 
     print(
-        f"Copied {len(images_in_subset)} images and {copied_labels} labels to {subset} set."
+        f"Copied {copied_images} images and {copied_labels} non-empty labels to {subset} set."
     )
 
 print("---")
