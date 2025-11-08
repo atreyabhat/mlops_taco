@@ -1,6 +1,6 @@
 # MLOps End-to-End: TACO Garbage Detection
 
-This is a effort for me personally learn MLOps, to go beyond training/inferencing models in research/academia. The model training part and getting great results with object detection is not a moto of this project. It can be said as only a placeholder. 
+This is an effort at learning MLOps, to go beyond training/inferencing models in research/academia. The model training part and getting great results with object detection is not a moto of this project. It can be said as only a placeholder. 
 
 A production-grade MLOps pipeline for object detection using the TACO dataset. This project demonstrates a complete lifecycle from data ingestion to monitored deployment, built with open-source tools.
 
