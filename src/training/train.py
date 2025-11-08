@@ -40,22 +40,21 @@ mlflow.set_experiment("taco_sort_training")
 # Define training parameters with augmentation
 params = {
     "model_type": "./taco-sort-mlops/yolo11m.pt",
-    "epochs": 1,
-    "imgsz": 640,
-    "lr0": 0.005,
-    # Color space augmentations
-    "hsv_h": 0.015,  # Hue shift (0.0-1.0)
-    "hsv_s": 0.7,  # Saturation shift (0.0-1.0)
-    "hsv_v": 0.4,  # Brightness shift (0.0-1.0)
-    # Geometric transformations
-    "degrees": 10.0,  # Rotation (0-180)
-    "translate": 0.1,  # Translation (0.0-1.0)
-    "scale": 0.5,  # Scaling (>=0.0)
-    "shear": 5.0,  # Shear angle (-180 to +180)
-    "perspective": 0.0,  # Perspective transform (0.0-0.001)
-    # Flip augmentations
-    "fliplr": 0.5,  # Horizontal flip probability (0.0-1.0)
-    "flipud": 0.0,  # Vertical flip probability (0.0-1.0)
+    "epochs": 50,
+    "imgsz": 640,  # larger to help small objects
+    "lr0": 0.001,  # lower LR for fine-tuning
+    "batch": 16,  # maybe smaller batch if high res
+    # Augmentation parameters
+    "hsv_h": 0.01,
+    "hsv_s": 0.5,
+    "hsv_v": 0.3,
+    "degrees": 5.0,
+    "translate": 0.05,
+    "scale": 0.8,
+    "shear": 2.0,
+    "perspective": 0.001,
+    "fliplr": 0.5,
+    "flipud": 0.0,
 }
 
 # Start MLflow run
@@ -76,16 +75,16 @@ with mlflow.start_run() as run:
         workers=16,
         batch=16,
         # Add augmentation parameters
-        hsv_h=params["hsv_h"],
-        hsv_s=params["hsv_s"],
-        hsv_v=params["hsv_v"],
-        degrees=params["degrees"],
-        translate=params["translate"],
-        scale=params["scale"],
-        shear=params["shear"],
-        perspective=params["perspective"],
-        fliplr=params["fliplr"],
-        flipud=params["flipud"],
+        # hsv_h=params["hsv_h"],
+        # hsv_s=params["hsv_s"],
+        # hsv_v=params["hsv_v"],
+        # degrees=params["degrees"],
+        # translate=params["translate"],
+        # scale=params["scale"],
+        # shear=params["shear"],
+        # perspective=params["perspective"],
+        # fliplr=params["fliplr"],
+        # flipud=params["flipud"],
     )
 
     # Log artifacts
